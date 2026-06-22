@@ -90,11 +90,14 @@ public class PatronPanel extends JPanel {
         populateTable(results);
     }
 
+    private List<Patron> currentDisplayedPatrons;
+
     public void refreshTable() {
         populateTable(libraryManager.getPatrons());
     }
 
     private void populateTable(List<Patron> patrons) {
+        this.currentDisplayedPatrons = patrons;
         tableModel.setRowCount(0);
         for (Patron p : patrons) {
             tableModel.addRow(new Object[]{p.getId(), p.getName(), p.getContactInfo()});
@@ -107,8 +110,7 @@ public class PatronPanel extends JPanel {
             JOptionPane.showMessageDialog(this, "Please select a patron.");
             return null;
         }
-        String id = (String) tableModel.getValueAt(row, 0);
-        return libraryManager.getPatrons().stream().filter(p -> p.getId().equals(id)).findFirst().orElse(null);
+        return currentDisplayedPatrons.get(row);
     }
 
     private void deleteSelectedPatron() {

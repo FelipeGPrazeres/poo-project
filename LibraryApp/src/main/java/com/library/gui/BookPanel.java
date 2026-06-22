@@ -5,6 +5,7 @@
  */
 package com.library.gui;
 
+import com.library.exceptions.BookHasActiveLoansException;
 import com.library.models.Book;
 import com.library.services.AuthManager;
 import com.library.services.LibraryManager;
@@ -75,8 +76,12 @@ public class BookPanel extends JPanel {
             if (selected != null) {
                 int confirm = JOptionPane.showConfirmDialog(this, "Delete " + selected.getTitle() + "?", "Confirm", JOptionPane.YES_NO_OPTION);
                 if (confirm == JOptionPane.YES_OPTION) {
-                    libraryManager.deleteBook(selected);
-                    refreshTable();
+                    try {
+                        libraryManager.deleteBook(selected);
+                        refreshTable();
+                    } catch (BookHasActiveLoansException ex) {
+                        JOptionPane.showMessageDialog(this, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                    }
                 }
             }
         });
@@ -98,11 +103,14 @@ public class BookPanel extends JPanel {
         populateTable(results);
     }
 
+    private List<Book> currentDisplayedBooks;
+
     public void refreshTable() {
         populateTable(libraryManager.getBooks());
     }
 
     private void populateTable(List<Book> books) {
+        this.currentDisplayedBooks = books;
         tableModel.setRowCount(0);
         for (Book b : books) {
             tableModel.addRow(new Object[]{b.getTitle(), b.getAuthor(), b.getIsbn(), b.getTotalCopies(), b.getAvailableCopies()});
@@ -115,8 +123,7 @@ public class BookPanel extends JPanel {
             JOptionPane.showMessageDialog(this, "Please select a book.");
             return null;
         }
-        String isbn = (String) tableModel.getValueAt(row, 2);
-        return libraryManager.getBooks().stream().filter(b -> b.getIsbn().equals(isbn)).findFirst().orElse(null);
+        return currentDisplayedBooks.get(row);
     }
 
     private void showAddEditDialog(Book bookToEdit) {

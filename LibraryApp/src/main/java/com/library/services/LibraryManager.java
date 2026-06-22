@@ -7,6 +7,7 @@ package com.library.services;
 
 import com.library.data.FileManager;
 import com.library.exceptions.BookAlreadyOnLoanException;
+import com.library.exceptions.BookHasActiveLoansException;
 import com.library.exceptions.PatronHasActiveLoansException;
 import com.library.models.Book;
 import com.library.models.Loan;
@@ -39,6 +40,13 @@ public class LibraryManager {
     }
 
     public void updateBook(Book oldBook, Book newBook) {
+        for (int i = 0; i < books.size(); i++) {
+            if (books.get(i) == oldBook) {
+                books.set(i, newBook);
+                saveData();
+                return;
+            }
+        }
         int index = books.indexOf(oldBook);
         if (index != -1) {
             books.set(index, newBook);
@@ -46,7 +54,21 @@ public class LibraryManager {
         }
     }
 
-    public void deleteBook(Book book) {
+    public void deleteBook(Book book) throws BookHasActiveLoansException {
+        boolean hasActiveLoans = loans.stream()
+                .anyMatch(l -> l.getBook().equals(book) && l.isActive());
+        
+        if (hasActiveLoans) {
+            throw new BookHasActiveLoansException("Cannot delete book with active loans.");
+        }
+
+        for (int i = 0; i < books.size(); i++) {
+            if (books.get(i) == book) {
+                books.remove(i);
+                saveData();
+                return;
+            }
+        }
         books.remove(book);
         saveData();
     }
@@ -71,6 +93,13 @@ public class LibraryManager {
     }
 
     public void updatePatron(Patron oldPatron, Patron newPatron) {
+        for (int i = 0; i < patrons.size(); i++) {
+            if (patrons.get(i) == oldPatron) {
+                patrons.set(i, newPatron);
+                saveData();
+                return;
+            }
+        }
         int index = patrons.indexOf(oldPatron);
         if (index != -1) {
             patrons.set(index, newPatron);
@@ -84,6 +113,14 @@ public class LibraryManager {
         
         if (hasActiveLoans) {
             throw new PatronHasActiveLoansException("Cannot delete patron with active loans.");
+        }
+        
+        for (int i = 0; i < patrons.size(); i++) {
+            if (patrons.get(i) == patron) {
+                patrons.remove(i);
+                saveData();
+                return;
+            }
         }
         patrons.remove(patron);
         saveData();

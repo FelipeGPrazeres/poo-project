@@ -40,4 +40,10 @@ This project uses Maven for dependency management (specifically JUnit 5 for test
 1. Open a terminal and navigate to the `LibraryApp` folder.
 2. Compile the project: `mvn compile`
 3. Run the application: `mvn exec:java -Dexec.mainClass="com.library.Main"`
-4. To run tests: `mvn test`
+
+### To run tests:
+With maven installed: mvn test (after the previous steps)
+Through Intellij:
+   1. Open `test` folder, then `java` and then `com.library.services`.
+   2. Right click `com.library.services`
+   3. Click "Run 'Tests in 'com.library.services''"
